@@ -1,44 +1,18 @@
 local posx, posy = 64, 64
-local speed = 1.3
-local velx, vely = 0, 0
-local accelx, accely = 0, 0
-local friction = 0.95
+local speed = 1.2
 
 local mx = 64
 local my = 64
-
-local dashing = false
 
 function _init()
     poke(0x5f2d, 1)
 end
 
 function _update()
-    if btn(4) then
-        if btn(0) then accelx -= 0.3 end
-        if btn(1) then accelx += 0.3 end
-        if btn(2) then accely -= 0.3 end
-        if btn(3) then accely += 0.3 end
-    else
-        velx = 0
-        vely = 0
-        if btn(0) then velx -= speed end
-        if btn(1) then velx += speed end
-        if btn(2) then vely -= speed end
-        if btn(3) then vely += speed end
-    end
-    
-    velx += accelx
-    vely += accely
-
-    velx *= 0.95
-    vely *= 0.95
-
-    posx += velx
-    posy += vely
-    accelx = 0 -- reset the push
-    accely = 0
-
+    if btn(0) then posx -= speed end
+    if btn(1) then posx += speed end
+    if btn(2) then posy -= speed end
+    if btn(3) then posy += speed end
     mx = stat(32)
     my = stat(33)
 end
@@ -46,7 +20,8 @@ end
 function _draw()
     cls()
     rectfill(posx - 1, posy - 1, posx + 1, posy + 1, 7)
-    spr(1, posx, posy)
+    spr(1, posx - 3, posy - 3)
     line(posx, posy, mx, my, 7)
+    rect(4, 4, 124, 124, 12)
     spr(0, mx-4, my-4)
 end
