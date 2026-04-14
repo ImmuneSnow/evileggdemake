@@ -17,6 +17,23 @@ function _init()
     poke(0x5f2d, 1)
 end
 
+-- custom function by the community thank you so much omg i wanna kiss whoever made this
+function rspr(s,x,y,a)
+    local sx=(s%16)*8
+    local sy=flr(s/16)*8
+    for i=0,7 do
+        for j=0,7 do
+            local c=sget(sx+i,sy+j)
+            if c!=0 then 
+                local dx,dy=i-3.5,j-3.5
+                local rx=x+dx*cos(a)-dy*sin(a)
+                local ry=y+dx*sin(a)+dy*cos(a)
+                pset(rx,ry,c)
+            end
+        end
+    end
+end
+
 function _update()
 
     if not hatched then
@@ -33,6 +50,11 @@ function _update()
 
         posx += velx
         posy += vely
+
+        if velx > 4 then velx = 4 end
+        if velx < -4 then velx = -4 end
+        if vely > 4 then vely = 4 end
+        if vely < -4 then vely = -4 end
 
         if btn(4) then
             hatched = true
@@ -67,17 +89,25 @@ end
 
 function _draw()
     cls()
-    rectfill(posx - 1, posy - 1, posx + 1, posy + 1, 7)
-    rect(0, 8, 127, 119, 12)
+  
 
+    local x_dist = mx - posx
+    local y_dist = my - posy
+    local ang = atan2(x_dist, y_dist)
+    local endx = posx + cos(ang) * 15
+    local endy = posy + sin(ang) * 15
+
+    rect(0, 8, 127, 119, 12)
+  
     if not hatched then
         spr(2, posx - 3, posy - 3)
     else
         spr(1, posx - 3, posy - 3)
-        line(posx, posy, mx, my, 7)
-        spr(0, mx-4, my-4)
+        line(posx, posy, endx, endy, 7)
+        rspr(0, mx, my, t()) 
     end
 end
+
 __gfx__
 77700777777777700077e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 7000000777eee770077eee0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
