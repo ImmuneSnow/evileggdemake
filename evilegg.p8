@@ -3,7 +3,7 @@ version 41
 __lua__
 local posx, posy = 64, 64
 local speed = 1.2
-local bspeed = 0.5
+local bspeed = 0.4
 
 local mx, my = 64, 64
 
@@ -51,10 +51,10 @@ function _update()
         posx += velx
         posy += vely
 
-        if velx > 4 then velx = 4 end
-        if velx < -4 then velx = -4 end
-        if vely > 4 then vely = 4 end
-        if vely < -4 then vely = -4 end
+        if velx > 3 then velx = 3 end
+        if velx < -3 then velx = -3 end
+        if vely > 3 then vely = 3 end
+        if vely < -3 then vely = -3 end
 
         if btn(4) then
             hatched = true
@@ -64,10 +64,10 @@ function _update()
             if btn(2) then vely -= bspeed end
             if btn(3) then vely += bspeed end
 
-            if posx<4 then posx=4 velx*=-0.5 end
-            if posx>123 then posx=123 velx*=-0.5 end
-            if posy<12 then posy=12 vely*=-0.5 end
-            if posy>115 then posy=115 vely*=-0.5 end
+            if posx<4 then posx=4 velx*=-0.7 end
+            if posx>123 then posx=123 velx*=-0.7 end
+            if posy<12 then posy=12 vely*=-0.7 end
+            if posy>115 then posy=115 vely*=-0.7 end
         else
             if btn(0) then posx -= speed end
             if btn(1) then posx += speed end
@@ -89,8 +89,6 @@ end
 
 function _draw()
     cls()
-  
-
     local x_dist = mx - posx
     local y_dist = my - posy
     local ang = atan2(x_dist, y_dist)
