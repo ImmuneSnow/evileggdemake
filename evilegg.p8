@@ -12,12 +12,13 @@ local accelx, accely = 0, 0
 local friction = 0.95
 
 local hatched = false
+local trails = {}
+local trailmeter = 0
 
 function _init()
     poke(0x5f2d, 1)
 end
 
--- custom function by the community thank you so much omg i wanna kiss whoever made this
 function rspr(s,x,y,a)
     local sx=(s%16)*8
     local sy=flr(s/16)*8
@@ -34,20 +35,35 @@ function rspr(s,x,y,a)
     end
 end
 
-function _update()
+-- thank you charlie omg omg omg
+function newtrail(ix,iy,ixv,iyv)
+    add(trails,{
+        x=ix,
+        y=iy,
+        xv=ixv,
+        yv=iyv,
+        life=6,
+        draw=function(self)
+            self.x+=self.xv
+            self.y+=self.yv
+            self.life-=1
+            if self.life<=0 then
+                del(trails,self)
+            end
+            rectfill(self.x-1,self.y-1,self.x+1,self.y+1,7)
+        end
+    })
+end
 
+function _update()
     if not hatched then
         if btn(4) then hatched=true end
-
     else
         velx += accelx
         vely += accely
-
         accelx, accely = 0, 0
-
         velx *= friction
         vely *= friction
-
         posx += velx
         posy += vely
 
@@ -57,8 +73,6 @@ function _update()
         if vely < -3 then vely = -3 end
 
         if btn(4) then
-            hatched = true
-
             if btn(0) then velx -= bspeed end
             if btn(1) then velx += bspeed end
             if btn(2) then vely -= bspeed end
@@ -68,6 +82,12 @@ function _update()
             if posx>123 then posx=123 velx*=-0.7 end
             if posy<12 then posy=12 vely*=-0.7 end
             if posy>115 then posy=115 vely*=-0.7 end
+
+            trailmeter += abs(velx) + abs(vely)
+            if trailmeter >= 6 then
+                newtrail(posx, posy, -velx*0.3+(rnd(2)-1), -vely*0.3+(rnd(2)-1))
+                trailmeter -= 6
+            end
         else
             if btn(0) then posx -= speed end
             if btn(1) then posx += speed end
@@ -80,6 +100,7 @@ function _update()
             if posy>115 then posy=115 end
 
             velx, vely = 0, 0
+            trailmeter = 0
         end
 
         mx = stat(32)
@@ -96,13 +117,17 @@ function _draw()
     local endy = posy + sin(ang) * 15
 
     rect(0, 8, 127, 119, 12)
-  
+
+    for i in all(trails) do
+        i.draw(i)
+    end
+
     if not hatched then
-        spr(2, posx - 3, posy - 3)
+        spr(2, posx-3, posy-3)
     else
-        spr(1, posx - 3, posy - 3)
+        spr(1, posx-3, posy-3)
         line(posx, posy, endx, endy, 7)
-        rspr(0, mx, my, t()) 
+        rspr(0, mx, my, t())
     end
 end
 
