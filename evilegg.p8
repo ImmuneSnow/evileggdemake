@@ -14,12 +14,16 @@ local accelx, accely = 0, 0
 local friction = 0.95
 
 local hatched = false
+local hatched_particles_spawned = false
+
 local trails = {}
 local trailmeter = 0
 
 local dash_length = 2  -- pixels
 local gap_length = 2   -- pixels
 local num_dashes = 4   -- how many dashes to draw
+
+local particles = {} -- maybe particle system idk
 
 function _init()
     poke(0x5f2d, 1)
@@ -64,6 +68,30 @@ end
 
 -- so this is a bit of a mess but it works and i dont care
 function _update()
+    for p in all(particles) do
+        if p.t>0 then
+            p.x+=p.dx
+            p.y+=p.dy
+            p.t-=1
+        end
+        p.life-=1
+        if p.life<=0 then del(particles,p) end
+    end
+
+    if hatched==true and not hatched_particles_spawned then 
+        for j=1,8 do
+            add(particles,{
+                x=posx,y=posy,
+                dx=rnd(4)-2,
+                dy=rnd(4)-2,
+                t=8,
+                life=25+flr(rnd(20)),
+                col=14
+            })
+        end
+        hatched_particles_spawned = true 
+    end
+
     if not hatched then
         if btn(4) then hatched=true end
     else
@@ -136,6 +164,11 @@ function _draw()
         spr(2, posx-3, posy-3)
     else
 
+    for p in all(particles) do
+        local c=p.t>0 and 14 or p.col
+        pset(p.x,p.y,c)
+    end
+
         -- draw dashed pink line under the player sprite
         local segments = {
             {start_pct=0.0, end_pct=0.2},
@@ -174,7 +207,7 @@ __gfx__
 0099899911111100008888009999999922255222a000000a70eee07008888880c100000c99989998022bb220899999980a8aa8a0000eccce02c200c200777720
 00099109011110000888888a99999999288288280a090a00707e0ee0aaaaaaaac000001c9998999822bbbb2202888820080880800000eee00000202007777720
 00009000100001000888888a99999999288288280a888a00077eee00000000000c0101c099989998220bb02282022028aaaaaaaaeeeeeeee0002020277777722
-00009900011110000aa00000909090900555555000080000000000000008800000cccc000880088002222220880880880aaaaaaaeeeeeeee0000002077777222
+00009900011110000aa00000909090900555555000080000000000000008800077cccc000880088002222220880880880aaaaaaaeeeeeeee0000002077777222
 bbbbbbbbeeeeeeee88888888ccccccccaaaaaaaa0ee00ee0999999990b0bb0b0bb00bb0000000000900000000077070000000000000000000000000000000000
 b003b30be002e0ee80000008c0000ccca00a900ae888888890000009bb0bb0bb0bbb0b000cccccc0998899990077070000000000000000000000000000000000
 b00000bbe000000e80088008c00ccccca000000ae8088888909a9a09bbb00bbb00b0000001cccdd1880089090077770000000000000000000000000000000000
